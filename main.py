@@ -4,6 +4,7 @@ import bisect
 
 USER_PROFILE_PREFIX = "/citations?hl=en&amp;user="
 AFTER_AUTHOR_INDICATOR = "x26after_author\\x3d"
+INSTITUTION_NAME_HEADER = "<h2 class=\"gsc_authors_header\">"
 
 publications = []
 hasSignificantFaculty = True
@@ -22,7 +23,13 @@ def calculateHindex():
     lastUpdatedH = ind
     return ind
 
-origin = input("Enter the URL of the first page of the institution's Google scholar page (the only HTTP get parameters should be view_op, org, hl, and maybe oi): ")
+origin = input("Enter the URL of the first page of the institution's Google scholar page (the only HTTP get parameters should be view_op, org, and hl): ")
+text = requests.get(origin).text
+header = text.find(INSTITUTION_NAME_HEADER)
+end = text.find(" <", header)
+univ = text[header + len(INSTITUTION_NAME_HEADER) : end]
+print("\n" + univ + "\n")
+
 url = origin
 
 while hasSignificantFaculty:
@@ -35,15 +42,15 @@ while hasSignificantFaculty:
     while index != -1:
         quote = htmlSrc.find("\"", index)
         facultyID = htmlSrc[index + len(USER_PROFILE_PREFIX) : quote]
-        print(facultyID)
 
         if facultyID not in facultyIDSet:
             facultyIDSet.add(facultyID)
 
             author = scholarly.search_author_id(facultyID)
-            print("Filling author publications and counts")
+            print("Filling publication and citation data for " + author.name)
             author.fill(['publications', 'counts'])
 
+            print("Checking if faculty is significant enough to continue")
             citedby = 0
             for i in author.cites_per_year.values():
                 citedby += i
@@ -52,15 +59,20 @@ while hasSignificantFaculty:
                 hasSignificantFaculty = False
                 break
 
-            print("Adding in author publications")
+            print("Adding " + author.name + "\'s publications: ", end = "")
+            c = 0
             for pub in author.publications:
                 if int(pub.bib['cites']) < lastUpdatedH:
                     break
                 bisect.insort(publications, int(pub.bib['cites']))
+                c += 1
+            print(str(c) + " out of " + str(len(author.publications)) + " were added")
+        
         index = htmlSrc.find(USER_PROFILE_PREFIX, quote)
+        print()
 
     calculateHindex()
-    print("Last updated h-index: " + str(lastUpdatedH))
+    print("Most recent h-index value: " + str(lastUpdatedH) + "\n")
 
     nextIndex = htmlSrc.find(AFTER_AUTHOR_INDICATOR)
     slash = htmlSrc.find("\\", nextIndex + len(AFTER_AUTHOR_INDICATOR))
@@ -70,4 +82,5 @@ while hasSignificantFaculty:
     astart = htmlSrc[slash + 14 : single]
 
     url = origin + "&after_author=" + after_author + "&astart=" + astart
-    print(url)
+    print("Starting page " + str(int(astart)/10 + 1) + "\n")
+print("Final h-index value: " + str(lastUpdatedH))

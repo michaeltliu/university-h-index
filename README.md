@@ -13,4 +13,8 @@ To be clear, we are not computing the simple mean of the h-indices of all member
 ### To run:
 1. `python3 main.py`
 2. Search Google Scholar for the desired institution. At the top of the search results, there will a link that directs to the institution's page. Copy the link address and paste it into stdin.
-3. Wait! The program takes a while to run, but provides regular updates as to what it's doing. Once you see the "last updated h-index" value begin to plateau, you can assume the final value will be in that ballpark.
+3. Wait! The program takes a while to run, but provides regular updates as to what it's doing. Once you see the "most recent h-index" value begin to plateau, you can assume the final value will be in that ballpark.
+
+### Note:
+- For each faculty member, there will be a line that prints out how many of their publications were "added". This number will often not be 100% of their total publications. This is not an error -- insignificant publications are skipped in order to save on time and memory.
+- The vast majority of the program's runtime comes from waiting on the Scholarly API. The API is inherently slow. There's nothing I can do about it.
