@@ -22,7 +22,7 @@ def calculateHindex():
     lastUpdatedH = ind
     return ind
 
-origin = input("Enter the URL of the first page of the institution's Google scholar page (the only HTTP get parameters should be view_op, org, hl, and oi): ")
+origin = input("Enter the URL of the first page of the institution's Google scholar page (the only HTTP get parameters should be view_op, org, hl, and maybe oi): ")
 url = origin
 
 while hasSignificantFaculty:
@@ -60,7 +60,7 @@ while hasSignificantFaculty:
         index = htmlSrc.find(USER_PROFILE_PREFIX, quote)
 
     calculateHindex()
-    print(lastUpdatedH)
+    print("Last updated h-index: " + str(lastUpdatedH))
 
     nextIndex = htmlSrc.find(AFTER_AUTHOR_INDICATOR)
     slash = htmlSrc.find("\\", nextIndex + len(AFTER_AUTHOR_INDICATOR))
